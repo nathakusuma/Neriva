@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.ui.Modifier
-import com.nathakusuma.neriva.ui.onboarding.OnboardingFlow
+import com.nathakusuma.neriva.ui.navigation.AppNavigation
 import com.nathakusuma.neriva.ui.theme.NerivaTheme
 
 class MainActivity : ComponentActivity() {
@@ -23,11 +23,7 @@ class MainActivity : ComponentActivity() {
                         .fillMaxSize()
                         .systemBarsPadding()
                 ) {
-                    OnboardingFlow(
-                        onFinish = {
-                            // TODO: Handle finish
-                        }
-                    )
+                    AppNavigation()
                 }
             }
         }
