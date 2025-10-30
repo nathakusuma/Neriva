@@ -3,7 +3,7 @@ package com.nathakusuma.neriva.ui.navigation
 import androidx.compose.runtime.*
 import com.nathakusuma.neriva.ui.auth.LoginScreen
 import com.nathakusuma.neriva.ui.auth.SignUpScreen
-import com.nathakusuma.neriva.ui.onboarding.OnboardingFlow
+import com.nathakusuma.neriva.ui.onboarding.OnboardingScreen
 
 /**
  * Navigation states for the app
@@ -26,7 +26,7 @@ fun AppNavigation() {
 
     when (currentScreen) {
         Screen.ONBOARDING -> {
-            OnboardingFlow(
+            OnboardingScreen(
                 onFinish = {
                     currentScreen = Screen.LOGIN
                 }

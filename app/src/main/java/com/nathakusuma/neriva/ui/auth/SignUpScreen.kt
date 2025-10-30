@@ -8,7 +8,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,53 +20,33 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.nathakusuma.neriva.ui.theme.NerivaTheme
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 /**
  * Sign Up screen for user registration
  *
  * @param modifier Modifier to be applied to the root composable
+ * @param viewModel ViewModel for managing sign up state and business logic
  * @param onNavigateToLogin Callback when user wants to navigate to login screen
  * @param onSignUpSuccess Callback when sign up is successful
  */
 @Composable
 fun SignUpScreen(
     modifier: Modifier = Modifier,
+    viewModel: SignUpViewModel = viewModel(),
     onNavigateToLogin: () -> Unit = {},
     onSignUpSuccess: () -> Unit = {}
 ) {
-    val scope = rememberCoroutineScope()
     val focus = LocalFocusManager.current
+    val uiState by viewModel.uiState.collectAsState()
 
-    var name by rememberSaveable { mutableStateOf("") }
-    var email by rememberSaveable { mutableStateOf("") }
-    var password by rememberSaveable { mutableStateOf("") }
-    var passwordHidden by rememberSaveable { mutableStateOf(true) }
-    var isLoading by rememberSaveable { mutableStateOf(false) }
-    var error by rememberSaveable { mutableStateOf<String?>(null) }
-
-    fun isValid(): Boolean {
-        if (name.isBlank()) {
-            error = "Name is required"
-            return false
+    // Handle sign up success
+    LaunchedEffect(uiState.isSignUpSuccessful) {
+        if (uiState.isSignUpSuccessful) {
+            onSignUpSuccess()
+            viewModel.resetSignUpSuccess()
         }
-        if (!email.contains("@") || !email.contains(".")) {
-            error = "Enter a valid email"
-            return false
-        }
-        if (password.length < 6) {
-            error = "Password must be at least 6 characters"
-            return false
-        }
-        error = null
-        return true
-    }
-
-    suspend fun performSignUp() {
-        // TODO(REST API): Replace with real REST call
-        delay(1000)
     }
 
     Box(
@@ -104,11 +83,8 @@ fun SignUpScreen(
             // Name
             FieldLabel("Name")
             OutlinedTextField(
-                value = name,
-                onValueChange = {
-                    name = it
-                    error = null
-                },
+                value = uiState.name,
+                onValueChange = viewModel::updateName,
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("Enter your name") },
                 singleLine = true,
@@ -116,17 +92,14 @@ fun SignUpScreen(
                     imeAction = ImeAction.Next,
                     keyboardType = KeyboardType.Text
                 ),
-                isError = error != null && name.isBlank()
+                isError = uiState.errorMessage != null && uiState.name.isBlank()
             )
 
             // Email
             FieldLabel("Email Address")
             OutlinedTextField(
-                value = email,
-                onValueChange = {
-                    email = it
-                    error = null
-                },
+                value = uiState.email,
+                onValueChange = viewModel::updateEmail,
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("Enter your email") },
                 singleLine = true,
@@ -134,29 +107,26 @@ fun SignUpScreen(
                     keyboardType = KeyboardType.Email,
                     imeAction = ImeAction.Next
                 ),
-                isError = error != null && !email.contains("@")
+                isError = uiState.errorMessage != null && !uiState.email.contains("@")
             )
 
             // Password
             FieldLabel("Password")
             OutlinedTextField(
-                value = password,
-                onValueChange = {
-                    password = it
-                    error = null
-                },
+                value = uiState.password,
+                onValueChange = viewModel::updatePassword,
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("Please Enter Your Password") },
                 singleLine = true,
-                visualTransformation = if (passwordHidden) {
-                    PasswordVisualTransformation()
-                } else {
+                visualTransformation = if (uiState.isPasswordVisible) {
                     VisualTransformation.None
+                } else {
+                    PasswordVisualTransformation()
                 },
                 trailingIcon = {
-                    TextButton(onClick = { passwordHidden = !passwordHidden }) {
+                    TextButton(onClick = viewModel::togglePasswordVisibility) {
                         Text(
-                            text = if (passwordHidden) "Show" else "Hide",
+                            text = if (uiState.isPasswordVisible) "Show" else "Hide",
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
@@ -170,12 +140,12 @@ fun SignUpScreen(
                         focus.clearFocus()
                     }
                 ),
-                isError = error != null && password.length < 8
+                isError = uiState.errorMessage != null && uiState.password.length < 6
             )
 
-            if (error != null) {
+            if (uiState.errorMessage != null) {
                 Text(
-                    text = error!!,
+                    text = uiState.errorMessage!!,
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall
                 )
@@ -186,20 +156,9 @@ fun SignUpScreen(
             Button(
                 onClick = {
                     focus.clearFocus()
-                    if (!isValid()) return@Button
-                    isLoading = true
-                    scope.launch {
-                        try {
-                            performSignUp() // TODO(REST API)
-                            onSignUpSuccess()
-                        } catch (t: Throwable) {
-                            error = t.message ?: "Sign up failed"
-                        } finally {
-                            isLoading = false
-                        }
-                    }
+                    viewModel.signUp()
                 },
-                enabled = !isLoading,
+                enabled = !uiState.isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
@@ -207,7 +166,7 @@ fun SignUpScreen(
                     containerColor = MaterialTheme.colorScheme.primary
                 )
             ) {
-                if (isLoading) {
+                if (uiState.isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(22.dp),
                         strokeWidth = 2.2.dp,

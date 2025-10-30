@@ -16,41 +16,36 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 /**
- * Onboarding flow that manages page navigation state
+ * Onboarding screen for introducing users to the app
  *
  * @param modifier Modifier to be applied to the root composable
  * @param pages List of onboarding pages to display
- * @param initialPage The initial page index to display
+ * @param viewModel The ViewModel that manages onboarding state
  * @param onFinish Callback when onboarding is finished (last page next button)
  */
 @Composable
-fun OnboardingFlow(
+fun OnboardingScreen(
     modifier: Modifier = Modifier,
     pages: List<OnboardingPage> = OnboardingData.pages,
-    initialPage: Int = 0,
+    viewModel: OnboardingViewModel = viewModel(),
     onFinish: () -> Unit = {}
 ) {
-    var currentPageIndex by remember { mutableIntStateOf(initialPage) }
-    val isFirstPage = currentPageIndex == 0
-    val isLastPage = currentPageIndex == pages.size - 1
+    val uiState by viewModel.uiState.collectAsState()
 
     OnboardingScreenContent(
         modifier = modifier,
-        currentPage = pages[currentPageIndex],
-        currentPageIndex = currentPageIndex,
+        currentPage = pages[uiState.currentPageIndex],
+        currentPageIndex = uiState.currentPageIndex,
         totalPages = pages.size,
-        isFirstPage = isFirstPage,
-        isLastPage = isLastPage,
-        onNavigateBack = {
-            if (!isFirstPage) {
-                currentPageIndex--
-            }
-        },
+        isFirstPage = uiState.isFirstPage,
+        isLastPage = uiState.isLastPage,
+        onNavigateBack = viewModel::navigateBack,
         onNavigateNext = {
-            if (!isLastPage) {
-                currentPageIndex++
+            if (!uiState.isLastPage) {
+                viewModel.navigateNext()
             } else {
                 onFinish()
             }
@@ -267,9 +262,9 @@ private fun OnboardingScreenContentPreview() {
 
 @Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
 @Composable
-private fun OnboardingFlowPreview() {
+private fun OnboardingScreenPreview() {
     MaterialTheme {
-        OnboardingFlow(
+        OnboardingScreen(
             onFinish = {}
         )
     }

@@ -27,7 +27,7 @@ object OnboardingData {
         ),
         OnboardingPage(
             title = "We Help You Here",
-            description = "Our platform make you comfort to tackle the challenges of depression and suicide among younger generations",
+            description = "Our platform makes you comfortable to tackle the challenges of depression and suicide among younger generations",
             illustrationRes = R.drawable.ic_onboarding_2
 
         )

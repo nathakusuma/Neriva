@@ -6,7 +6,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
@@ -18,33 +17,36 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.nathakusuma.neriva.ui.theme.NerivaTheme
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 /**
  * Login screen for user authentication
  *
  * @param modifier Modifier to be applied to the root composable
+ * @param viewModel ViewModel for managing login state and business logic
  * @param onNavigateToSignUp Callback when user wants to navigate to sign up screen
  * @param onLoginSuccess Callback when login is successful
  */
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
+    viewModel: LoginViewModel = viewModel(),
     onNavigateToSignUp: () -> Unit = {},
     onLoginSuccess: () -> Unit = {}
 ) {
     val focus = LocalFocusManager.current
-    val scope = rememberCoroutineScope()
+    val uiState by viewModel.uiState.collectAsState()
 
-    var email by rememberSaveable { mutableStateOf("") }
-    var password by rememberSaveable { mutableStateOf("") }
-    var isPasswordVisible by rememberSaveable { mutableStateOf(false) }
-    var isLoading by rememberSaveable { mutableStateOf(false) }
-    var errorMessage by rememberSaveable { mutableStateOf<String?>(null) }
+    // Handle login success
+    LaunchedEffect(uiState.isLoginSuccessful) {
+        if (uiState.isLoginSuccessful) {
+            onLoginSuccess()
+            viewModel.resetLoginSuccess()
+        }
+    }
 
-    val canSubmit = email.isNotBlank() && password.isNotBlank() && !isLoading
+    val canSubmit = uiState.email.isNotBlank() && uiState.password.isNotBlank() && !uiState.isLoading
 
     Box(
         modifier = modifier
@@ -81,11 +83,8 @@ fun LoginScreen(
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 OutlinedTextField(
-                    value = email,
-                    onValueChange = {
-                        email = it
-                        errorMessage = null
-                    },
+                    value = uiState.email,
+                    onValueChange = viewModel::updateEmail,
                     placeholder = { Text("Enter your email") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
@@ -93,7 +92,7 @@ fun LoginScreen(
                         keyboardType = KeyboardType.Email,
                         imeAction = ImeAction.Next
                     ),
-                    isError = errorMessage != null
+                    isError = uiState.errorMessage != null
                 )
             }
 
@@ -105,23 +104,20 @@ fun LoginScreen(
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 OutlinedTextField(
-                    value = password,
-                    onValueChange = {
-                        password = it
-                        errorMessage = null
-                    },
+                    value = uiState.password,
+                    onValueChange = viewModel::updatePassword,
                     placeholder = { Text("Please Enter Your Password") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
-                    visualTransformation = if (isPasswordVisible) {
+                    visualTransformation = if (uiState.isPasswordVisible) {
                         VisualTransformation.None
                     } else {
                         PasswordVisualTransformation()
                     },
                     trailingIcon = {
-                        TextButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
+                        TextButton(onClick = viewModel::togglePasswordVisibility) {
                             Text(
-                                text = if (isPasswordVisible) "Hide" else "Show",
+                                text = if (uiState.isPasswordVisible) "Hide" else "Show",
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }
@@ -133,14 +129,14 @@ fun LoginScreen(
                     keyboardActions = KeyboardActions(
                         onDone = { focus.clearFocus() }
                     ),
-                    isError = errorMessage != null
+                    isError = uiState.errorMessage != null
                 )
             }
 
             // Error message
-            if (errorMessage != null) {
+            if (uiState.errorMessage != null) {
                 Text(
-                    text = errorMessage!!,
+                    text = uiState.errorMessage!!,
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall
                 )
@@ -152,27 +148,7 @@ fun LoginScreen(
             Button(
                 onClick = {
                     focus.clearFocus()
-                    // TODO(API): Replace this with REST API integration,
-                    // including proper error handling, token storage, and loading states.
-                    // viewModel.login(email, password)
-
-                    isLoading = true
-                    scope.launch {
-                        try {
-                            // Mock API call
-                            delay(1000)
-                            // Simulate validation
-                            if (email.contains("@") && password.length >= 8) {
-                                onLoginSuccess()
-                            } else {
-                                errorMessage = "Invalid email or password"
-                            }
-                        } catch (e: Exception) {
-                            errorMessage = e.message ?: "Login failed"
-                        } finally {
-                            isLoading = false
-                        }
-                    }
+                    viewModel.login()
                 },
                 enabled = canSubmit,
                 modifier = Modifier
@@ -182,7 +158,7 @@ fun LoginScreen(
                     containerColor = MaterialTheme.colorScheme.primary
                 )
             ) {
-                if (isLoading) {
+                if (uiState.isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
                         strokeWidth = 2.dp,
