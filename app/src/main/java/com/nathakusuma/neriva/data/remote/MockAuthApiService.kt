@@ -5,10 +5,10 @@ import com.nathakusuma.neriva.data.model.User
 import kotlinx.coroutines.delay
 
 /**
- * Mock API Service to simulate REST API calls
+ * Mock API Service for Authentication endpoints (login, signup, etc.)
  * TODO: Replace with actual Retrofit implementation
  */
-class MockApiService {
+class MockAuthApiService {
 
     /**
      * Mock login API call
@@ -69,11 +69,11 @@ class MockApiService {
 
     companion object {
         @Volatile
-        private var instance: MockApiService? = null
+        private var instance: MockAuthApiService? = null
 
-        fun getInstance(): MockApiService {
+        fun getInstance(): MockAuthApiService {
             return instance ?: synchronized(this) {
-                instance ?: MockApiService().also { instance = it }
+                instance ?: MockAuthApiService().also { instance = it }
             }
         }
     }

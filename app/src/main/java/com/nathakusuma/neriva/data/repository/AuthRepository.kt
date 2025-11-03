@@ -3,7 +3,7 @@ package com.nathakusuma.neriva.data.repository
 import com.nathakusuma.neriva.data.local.TokenManager
 import com.nathakusuma.neriva.data.model.AuthResponse
 import com.nathakusuma.neriva.data.model.Result
-import com.nathakusuma.neriva.data.remote.MockApiService
+import com.nathakusuma.neriva.data.remote.MockAuthApiService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.flow
  * Handles data operations and acts as a single source of truth
  */
 class AuthRepository(
-    private val apiService: MockApiService = MockApiService.getInstance(),
+    private val apiService: MockAuthApiService = MockAuthApiService.getInstance(),
     private val tokenManager: TokenManager = TokenManager.getInstance()
 ) {
 
