@@ -10,6 +10,7 @@ import com.nathakusuma.neriva.ui.auth.LoginScreen
 import com.nathakusuma.neriva.ui.auth.SignUpScreen
 import com.nathakusuma.neriva.ui.chat.ChatScreen
 import com.nathakusuma.neriva.ui.home.HomeScreen
+import com.nathakusuma.neriva.ui.mail.MailScreen
 import com.nathakusuma.neriva.ui.onboarding.OnboardingScreen
 import com.nathakusuma.neriva.ui.profile.EditProfileScreen
 
@@ -80,8 +81,7 @@ fun AppNavigation(
                     navController.navigate(Screen.Chat.route)
                 },
                 onNavigateToInbox = {
-                    // TODO: Implement inbox screen navigation
-                    // navController.navigate(Screen.Inbox.route)
+                    navController.navigate(Screen.Mail.route)
                 },
                 onNavigateToEditProfile = {
                     navController.navigate(Screen.EditProfile.route)
@@ -92,6 +92,15 @@ fun AppNavigation(
         // Chat Screen
         composable(route = Screen.Chat.route) {
             ChatScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // Mail Screen
+        composable(route = Screen.Mail.route) {
+            MailScreen(
                 onBackClick = {
                     navController.popBackStack()
                 }

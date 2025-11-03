@@ -247,9 +247,9 @@ fun HomeScreen(
 
 @Composable
 private fun ProfileAvatar(
+    modifier: Modifier = Modifier,
     avatarUrl: String?,
-    onClick: () -> Unit = {},
-    modifier: Modifier = Modifier
+    onClick: () -> Unit = {}
 ) {
     AsyncImage(
         model = ImageRequest.Builder(LocalContext.current)
@@ -269,9 +269,9 @@ private fun ProfileAvatar(
 
 @Composable
 private fun InboxIconWithBadge(
+    modifier: Modifier = Modifier,
     countText: String,
-    onClick: () -> Unit = {},
-    modifier: Modifier = Modifier
+    onClick: () -> Unit = {}
 ) {
     Box(
         modifier = modifier.size(38.dp),
@@ -280,7 +280,8 @@ private fun InboxIconWithBadge(
         // Mail icon
         Surface(
             shape = CircleShape,
-            color = Color(0xFFEDE3D7)
+            color = Color(0xFFEDE3D7),
+            onClick = onClick
         ) {
             Box(
                 modifier = Modifier.size(38.dp),
