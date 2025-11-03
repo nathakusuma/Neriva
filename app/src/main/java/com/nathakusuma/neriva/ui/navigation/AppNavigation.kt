@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.nathakusuma.neriva.ui.auth.LoginScreen
 import com.nathakusuma.neriva.ui.auth.SignUpScreen
+import com.nathakusuma.neriva.ui.chat.ChatScreen
 import com.nathakusuma.neriva.ui.home.HomeScreen
 import com.nathakusuma.neriva.ui.onboarding.OnboardingScreen
 
@@ -75,12 +76,20 @@ fun AppNavigation(
         composable(route = Screen.Home.route) {
             HomeScreen(
                 onNavigateToChat = {
-                    // TODO: Implement chat screen navigation
-                    // navController.navigate(Screen.Chat.route)
+                    navController.navigate(Screen.Chat.route)
                 },
                 onNavigateToInbox = {
                     // TODO: Implement inbox screen navigation
                     // navController.navigate(Screen.Inbox.route)
+                }
+            )
+        }
+
+        // Chat Screen
+        composable(route = Screen.Chat.route) {
+            ChatScreen(
+                onBackClick = {
+                    navController.popBackStack()
                 }
             )
         }
