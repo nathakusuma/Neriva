@@ -43,6 +43,24 @@ class UserRepository(
         }
     }
 
+    /**
+     * Update user profile information
+     * Returns a Flow of Result states (Loading, Success, Error)
+     */
+    fun updateUserProfile(
+        name: String,
+        email: String,
+        avatarUrl: String?
+    ): Flow<Result<User>> = flow {
+        try {
+            emit(Result.Loading)
+            val updatedUser = apiService.updateUserProfile(name, email, avatarUrl)
+            emit(Result.Success(updatedUser))
+        } catch (e: Exception) {
+            emit(Result.Error(e))
+        }
+    }
+
     companion object {
         @Volatile
         private var instance: UserRepository? = null

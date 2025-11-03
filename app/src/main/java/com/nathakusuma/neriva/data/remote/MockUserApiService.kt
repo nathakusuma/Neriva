@@ -46,6 +46,26 @@ class MockUserApiService {
         )
     }
 
+    /**
+     * Mock API call to update user profile
+     * Simulates network delay
+     */
+    suspend fun updateUserProfile(
+        name: String,
+        email: String,
+        avatarUrl: String?
+    ): User {
+        delay(800)
+
+        return User(
+            id = "user_${System.currentTimeMillis()}",
+            name = name,
+            email = email,
+            avatarUrl = avatarUrl ?: "https://i.pravatar.cc/150?img=12",
+            unreadNotifications = 3
+        )
+    }
+
     companion object {
         @Volatile
         private var instance: MockUserApiService? = null

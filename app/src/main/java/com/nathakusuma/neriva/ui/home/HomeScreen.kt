@@ -3,6 +3,7 @@ package com.nathakusuma.neriva.ui.home
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,13 +39,15 @@ import com.nathakusuma.neriva.ui.theme.NerivaTheme
  * @param viewModel ViewModel for managing home screen state
  * @param onNavigateToChat Callback when user wants to chat with pet
  * @param onNavigateToInbox Callback when user wants to view inbox
+ * @param onNavigateToEditProfile Callback when user wants to edit profile
  */
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = viewModel(),
     onNavigateToChat: () -> Unit = {},
-    onNavigateToInbox: () -> Unit = {}
+    onNavigateToInbox: () -> Unit = {},
+    onNavigateToEditProfile: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val softBeige = Color(0xFFF5EEE7)
@@ -67,7 +70,8 @@ fun HomeScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     ProfileAvatar(
-                        avatarUrl = uiState.userProfile?.avatarUrl
+                        avatarUrl = uiState.userProfile?.avatarUrl,
+                        onClick = onNavigateToEditProfile
                     )
 
                     Spacer(Modifier.width(14.dp))
@@ -244,6 +248,7 @@ fun HomeScreen(
 @Composable
 private fun ProfileAvatar(
     avatarUrl: String?,
+    onClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     AsyncImage(
@@ -256,7 +261,8 @@ private fun ProfileAvatar(
         error = painterResource(id = R.drawable.ic_home_profile_placeholder),
         modifier = modifier
             .size(44.dp)
-            .clip(CircleShape),
+            .clip(CircleShape)
+            .clickable(onClick = onClick),
         contentScale = ContentScale.Crop
     )
 }

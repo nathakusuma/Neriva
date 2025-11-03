@@ -11,6 +11,7 @@ import com.nathakusuma.neriva.ui.auth.SignUpScreen
 import com.nathakusuma.neriva.ui.chat.ChatScreen
 import com.nathakusuma.neriva.ui.home.HomeScreen
 import com.nathakusuma.neriva.ui.onboarding.OnboardingScreen
+import com.nathakusuma.neriva.ui.profile.EditProfileScreen
 
 /**
  * Main app navigation that manages screen transitions using Jetpack Navigation Component
@@ -81,6 +82,9 @@ fun AppNavigation(
                 onNavigateToInbox = {
                     // TODO: Implement inbox screen navigation
                     // navController.navigate(Screen.Inbox.route)
+                },
+                onNavigateToEditProfile = {
+                    navController.navigate(Screen.EditProfile.route)
                 }
             )
         }
@@ -88,6 +92,15 @@ fun AppNavigation(
         // Chat Screen
         composable(route = Screen.Chat.route) {
             ChatScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // Edit Profile Screen
+        composable(route = Screen.EditProfile.route) {
+            EditProfileScreen(
                 onBackClick = {
                     navController.popBackStack()
                 }
