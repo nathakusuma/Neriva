@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 data class EditProfileUiState(
     val name: String = "",
     val email: String = "",
-    val avatarUrl: String? = null,
+    val profilePhoto: String? = null,
     val selectedPhotoUri: Uri? = null,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
@@ -54,7 +54,7 @@ class EditProfileViewModel(
                         _uiState.value = _uiState.value.copy(
                             name = result.data.name,
                             email = result.data.email,
-                            avatarUrl = result.data.avatarUrl,
+                            profilePhoto = result.data.profilePhoto,
                             isLoading = false
                         )
                     }
@@ -100,7 +100,7 @@ class EditProfileViewModel(
             userRepository.updateUserProfile(
                 name = _uiState.value.name,
                 email = _uiState.value.email,
-                avatarUrl = _uiState.value.avatarUrl
+                profilePhoto = _uiState.value.profilePhoto
             ).collect { result ->
                 when (result) {
                     is Result.Loading -> {

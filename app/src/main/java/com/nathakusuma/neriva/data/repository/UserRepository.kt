@@ -1,5 +1,6 @@
 package com.nathakusuma.neriva.data.repository
 
+import com.nathakusuma.neriva.data.local.UserDataManager
 import com.nathakusuma.neriva.data.model.Pet
 import com.nathakusuma.neriva.data.model.Result
 import com.nathakusuma.neriva.data.model.User
@@ -12,18 +13,28 @@ import kotlinx.coroutines.flow.flow
  * Handles data operations and acts as a single source of truth
  */
 class UserRepository(
-    private val apiService: MockUserApiService = MockUserApiService.getInstance()
+    private val apiService: MockUserApiService = MockUserApiService.getInstance(),
+    private val userDataManager: UserDataManager = UserDataManager.getInstance()
 ) {
 
     /**
      * Get user profile information
+     * First tries to get from local storage, falls back to API if not found
      * Returns a Flow of Result states (Loading, Success, Error)
      */
     fun getUserProfile(): Flow<Result<User>> = flow {
         try {
             emit(Result.Loading)
-            val profile = apiService.getUserProfile()
-            emit(Result.Success(profile))
+
+            // Try to get from local storage first
+            val localUser = userDataManager.getUser()
+            if (localUser != null) {
+                emit(Result.Success(localUser))
+            } else {
+                // Fall back to API if no local data (for backward compatibility)
+                val profile = apiService.getUserProfile()
+                emit(Result.Success(profile))
+            }
         } catch (e: Exception) {
             emit(Result.Error(e))
         }
@@ -31,13 +42,22 @@ class UserRepository(
 
     /**
      * Get user's pet information
+     * First tries to get from local storage, falls back to API if not found
      * Returns a Flow of Result states (Loading, Success, Error)
      */
     fun getUserPet(): Flow<Result<Pet>> = flow {
         try {
             emit(Result.Loading)
-            val pet = apiService.getUserPet()
-            emit(Result.Success(pet))
+
+            // Try to get from local storage first
+            val localPet = userDataManager.getPet()
+            if (localPet != null) {
+                emit(Result.Success(localPet))
+            } else {
+                // Fall back to API if no local data (for backward compatibility)
+                val pet = apiService.getUserPet()
+                emit(Result.Success(pet))
+            }
         } catch (e: Exception) {
             emit(Result.Error(e))
         }
@@ -50,11 +70,13 @@ class UserRepository(
     fun updateUserProfile(
         name: String,
         email: String,
-        avatarUrl: String?
+        profilePhoto: String?
     ): Flow<Result<User>> = flow {
         try {
             emit(Result.Loading)
-            val updatedUser = apiService.updateUserProfile(name, email, avatarUrl)
+            val updatedUser = apiService.updateUserProfile(name, email, profilePhoto)
+            // Save updated user to local storage
+            userDataManager.saveUser(updatedUser)
             emit(Result.Success(updatedUser))
         } catch (e: Exception) {
             emit(Result.Error(e))

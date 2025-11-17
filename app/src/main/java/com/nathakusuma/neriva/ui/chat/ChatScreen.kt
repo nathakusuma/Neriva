@@ -48,7 +48,7 @@ fun ChatScreen(
         topBar = {
             ChatTopBar(
                 name = uiState.pet?.name ?: "Pet",
-                avatarUrl = uiState.pet?.imageUrl ?: "",
+                avatarUrl = "",  // Pet model doesn't have imageUrl anymore
                 isActive = true,
                 onBackClick = onBackClick
             )
@@ -91,7 +91,7 @@ fun ChatScreen(
                         ChatMessageRow(
                             message = message,
                             showAuthorName = showAuthorName,
-                            avatarUrl = uiState.pet?.imageUrl ?: ""
+                            avatarUrl = ""  // Pet model doesn't have imageUrl anymore
                         )
 
                         Spacer(modifier = Modifier.height(12.dp))

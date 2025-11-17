@@ -70,7 +70,7 @@ fun HomeScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     ProfileAvatar(
-                        avatarUrl = uiState.userProfile?.avatarUrl,
+                        avatarUrl = uiState.userProfile?.profilePhoto,
                         onClick = onNavigateToEditProfile
                     )
 
@@ -118,7 +118,7 @@ fun HomeScreen(
 
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)
-                                .data(pet.imageUrl)
+                                .data(R.drawable.ic_home_profile_placeholder)
                                 .crossfade(true)
                                 .build(),
                             contentDescription = "Pet Illustration",
@@ -154,7 +154,7 @@ fun HomeScreen(
                                 fontWeight = FontWeight.SemiBold
                             )
                             Text(
-                                pet.breed,
+                                pet.animalType,
                                 color = Color(0xFF7A7A7A),
                                 fontSize = 13.sp
                             )
@@ -166,22 +166,22 @@ fun HomeScreen(
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 InfoChip(
-                                    title = pet.sex,
+                                    title = pet.gender,
                                     subtitle = "Sex",
                                     modifier = Modifier.weight(1f)
                                 )
                                 InfoChip(
-                                    title = pet.age,
-                                    subtitle = "Age",
+                                    title = pet.birthDate,
+                                    subtitle = "Birth",
                                     modifier = Modifier.weight(1f)
                                 )
                                 InfoChip(
-                                    title = pet.weight,
+                                    title = "${pet.weight}kg",
                                     subtitle = "Weight",
                                     modifier = Modifier.weight(1f)
                                 )
                                 InfoChip(
-                                    title = if (pet.isVaccinated) "Yes" else "No",
+                                    title = if (pet.vaccine) "Yes" else "No",
                                     subtitle = "Vaccine",
                                     modifier = Modifier.weight(1f)
                                 )

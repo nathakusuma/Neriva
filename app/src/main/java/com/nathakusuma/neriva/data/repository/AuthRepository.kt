@@ -1,20 +1,44 @@
 package com.nathakusuma.neriva.data.repository
 
+import com.google.gson.Gson
 import com.nathakusuma.neriva.data.local.TokenManager
+import com.nathakusuma.neriva.data.local.UserDataManager
 import com.nathakusuma.neriva.data.model.AuthResponse
+import com.nathakusuma.neriva.data.model.LoginRequest
+import com.nathakusuma.neriva.data.model.RegisterRequest
 import com.nathakusuma.neriva.data.model.Result
-import com.nathakusuma.neriva.data.remote.MockAuthApiService
+import com.nathakusuma.neriva.data.remote.AuthApiService
+import com.nathakusuma.neriva.data.remote.RetrofitClient
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import retrofit2.HttpException
 
 /**
  * Repository for authentication operations
  * Handles data operations and acts as a single source of truth
  */
 class AuthRepository(
-    private val apiService: MockAuthApiService = MockAuthApiService.getInstance(),
-    private val tokenManager: TokenManager = TokenManager.getInstance()
+    private val apiService: AuthApiService = RetrofitClient.authApiService,
+    private val tokenManager: TokenManager = TokenManager.getInstance(),
+    private val userDataManager: UserDataManager = UserDataManager.getInstance()
 ) {
+
+    /**
+     * Parse error message from HTTP exception response
+     */
+    private fun parseErrorMessage(exception: HttpException): String {
+        return try {
+            val errorBody = exception.response()?.errorBody()?.string()
+            if (errorBody != null) {
+                val errorResponse = Gson().fromJson(errorBody, AuthResponse::class.java)
+                errorResponse.message
+            } else {
+                "HTTP ${exception.code()}: ${exception.message()}"
+            }
+        } catch (e: Exception) {
+            "HTTP ${exception.code()}: ${exception.message()}"
+        }
+    }
 
     /**
      * Login user with email and password
@@ -23,9 +47,22 @@ class AuthRepository(
     fun login(email: String, password: String): Flow<Result<AuthResponse>> = flow {
         try {
             emit(Result.Loading)
-            val response = apiService.login(email, password)
-            tokenManager.saveToken(response.token)
-            emit(Result.Success(response))
+            val request = LoginRequest(email, password)
+            val response = apiService.login(request)
+
+            if (response.success && response.data != null) {
+                // Save token
+                tokenManager.saveToken(response.data.token)
+                // Save user and pet data
+                userDataManager.saveUser(response.data.user)
+                userDataManager.savePet(response.data.pet)
+                emit(Result.Success(response))
+            } else {
+                emit(Result.Error(Exception(response.message)))
+            }
+        } catch (e: HttpException) {
+            val errorMessage = parseErrorMessage(e)
+            emit(Result.Error(Exception(errorMessage)))
         } catch (e: Exception) {
             emit(Result.Error(e))
         }
@@ -38,19 +75,33 @@ class AuthRepository(
     fun signUp(name: String, email: String, password: String): Flow<Result<AuthResponse>> = flow {
         try {
             emit(Result.Loading)
-            val response = apiService.signUp(name, email, password)
-            tokenManager.saveToken(response.token)
-            emit(Result.Success(response))
+            val request = RegisterRequest(name, email, password)
+            val response = apiService.register(request)
+
+            if (response.success && response.data != null) {
+                // Save token
+                tokenManager.saveToken(response.data.token)
+                // Save user and pet data
+                userDataManager.saveUser(response.data.user)
+                userDataManager.savePet(response.data.pet)
+                emit(Result.Success(response))
+            } else {
+                emit(Result.Error(Exception(response.message)))
+            }
+        } catch (e: HttpException) {
+            val errorMessage = parseErrorMessage(e)
+            emit(Result.Error(Exception(errorMessage)))
         } catch (e: Exception) {
             emit(Result.Error(e))
         }
     }
 
     /**
-     * Logout user and clear token
+     * Logout user and clear token, user data, and pet data
      */
     fun logout() {
         tokenManager.clearToken()
+        userDataManager.clearAll()
     }
 
     /**
@@ -71,4 +122,3 @@ class AuthRepository(
         }
     }
 }
-

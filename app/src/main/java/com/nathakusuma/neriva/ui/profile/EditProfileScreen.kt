@@ -168,7 +168,7 @@ fun EditProfileScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             ProfilePictureSection(
-                profileImageUrl = uiState.avatarUrl,
+                profileImageUrl = uiState.profilePhoto,
                 selectedPhotoUri = uiState.selectedPhotoUri,
                 modifier = Modifier.padding(top = 8.dp),
                 onChangePhoto = { showPhotoPickerSheet = true }

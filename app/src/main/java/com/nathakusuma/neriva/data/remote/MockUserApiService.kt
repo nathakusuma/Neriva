@@ -18,10 +18,10 @@ class MockUserApiService {
         delay(800)
 
         return User(
-            id = "user_${System.currentTimeMillis()}",
+            id = System.currentTimeMillis().toInt(),
             name = "Josh",
             email = "josh@example.com",
-            avatarUrl = "https://i.pravatar.cc/150?img=12",
+            profilePhoto = "https://i.pravatar.cc/150?img=12",
             unreadNotifications = 3
         )
     }
@@ -34,15 +34,14 @@ class MockUserApiService {
         delay(1000)
 
         return Pet(
-            id = "pet_${System.currentTimeMillis()}",
+            id = System.currentTimeMillis().toInt(),
             name = "Alex",
-            breed = "Australian Shepherd dog",
-            sex = "Male",
-            age = "1 Year",
-            weight = "10kg",
-            isVaccinated = true,
-            description = "Lorem ipsum dolor sit amet consectetur. Sed turpis nullam scelerisque mi quam curabitur proin. Lacus purus dolo vitae et odio odio. Ornare scelerisque et feugiat curabitur in mauris quis etiam diam.",
-            imageUrl = "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400"
+            animalType = "Australian Shepherd dog",
+            gender = "Male",
+            birthDate = "2023-01-01",
+            weight = 10.0,
+            vaccine = true,
+            description = "Lorem ipsum dolor sit amet consectetur. Sed turpis nullam scelerisque mi quam curabitur proin. Lacus purus dolo vitae et odio odio. Ornare scelerisque et feugiat curabitur in mauris quis etiam diam."
         )
     }
 
@@ -53,15 +52,15 @@ class MockUserApiService {
     suspend fun updateUserProfile(
         name: String,
         email: String,
-        avatarUrl: String?
+        profilePhoto: String?
     ): User {
         delay(800)
 
         return User(
-            id = "user_${System.currentTimeMillis()}",
+            id = System.currentTimeMillis().toInt(),
             name = name,
             email = email,
-            avatarUrl = avatarUrl ?: "https://i.pravatar.cc/150?img=12",
+            profilePhoto = profilePhoto ?: "https://i.pravatar.cc/150?img=12",
             unreadNotifications = 3
         )
     }
