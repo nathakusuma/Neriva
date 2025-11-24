@@ -104,7 +104,6 @@ class EditProfileViewModel(
 
             userRepository.updateUserProfile(
                 name = _uiState.value.name,
-                email = _uiState.value.email,
                 photoUri = _uiState.value.selectedPhotoUri
             ).collect { result ->
                 when (result) {

@@ -124,10 +124,12 @@ class UserRepository(
     /**
      * Update user profile information
      * Returns a Flow of Result states (Loading, Success, Error)
+     *
+     * @param name User's name to update
+     * @param photoUri Optional URI of photo to upload
      */
     fun updateUserProfile(
         name: String,
-        email: String,
         photoUri: Uri? = null
     ): Flow<Result<User>> = flow {
         try {
@@ -138,8 +140,8 @@ class UserRepository(
                 throw Exception("No authentication token found")
             }
 
-            // Create profile JSON
-            val profileRequest = UpdateProfileRequest(name, email)
+            // Create profile JSON (name only as per API spec)
+            val profileRequest = UpdateProfileRequest(name)
             val profileJson = Gson().toJson(profileRequest)
             val profileBody = profileJson.toRequestBody("application/json".toMediaTypeOrNull())
 

@@ -25,8 +25,8 @@ data class ProfileData(
 
 /**
  * Request model for updating profile
+ * Note: API accepts name only in the profile field
  */
 data class UpdateProfileRequest(
-    val name: String?,
-    val email: String?
+    val name: String
 )
