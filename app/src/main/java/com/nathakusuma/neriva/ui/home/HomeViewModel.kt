@@ -1,6 +1,7 @@
 package com.nathakusuma.neriva.ui.home
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.nathakusuma.neriva.data.model.Pet
 import com.nathakusuma.neriva.data.model.Result
@@ -26,14 +27,41 @@ data class HomeUiState(
  * Manages UI state and handles home screen business logic
  */
 class HomeViewModel(
-    private val userRepository: UserRepository = UserRepository.getInstance()
-) : ViewModel() {
+    application: Application
+) : AndroidViewModel(application) {
+
+    private val userRepository: UserRepository = UserRepository.getInstance(application.applicationContext)
 
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     init {
         loadHomeData()
+        observeLocalData()
+    }
+
+    /**
+     * Observe local data changes
+     * This ensures the UI updates when profile is edited from another screen
+     */
+    private fun observeLocalData() {
+        viewModelScope.launch {
+            // Observe user profile changes
+            userRepository.observeUserProfile().collect { user ->
+                if (user != null) {
+                    _uiState.value = _uiState.value.copy(userProfile = user)
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            // Observe pet changes
+            userRepository.observePet().collect { pet ->
+                if (pet != null) {
+                    _uiState.value = _uiState.value.copy(pet = pet)
+                }
+            }
+        }
     }
 
     /**

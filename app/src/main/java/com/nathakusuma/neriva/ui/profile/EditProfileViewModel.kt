@@ -1,9 +1,11 @@
 package com.nathakusuma.neriva.ui.profile
 
+import android.app.Application
 import android.net.Uri
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.nathakusuma.neriva.data.model.Result
+import com.nathakusuma.neriva.data.repository.AuthRepository
 import com.nathakusuma.neriva.data.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,8 +30,11 @@ data class EditProfileUiState(
  * Manages UI state and handles profile update business logic
  */
 class EditProfileViewModel(
-    private val userRepository: UserRepository = UserRepository.getInstance()
-) : ViewModel() {
+    application: Application
+) : AndroidViewModel(application) {
+
+    private val userRepository: UserRepository = UserRepository.getInstance(application.applicationContext)
+    private val authRepository: AuthRepository = AuthRepository.getInstance()
 
     private val _uiState = MutableStateFlow(EditProfileUiState())
     val uiState: StateFlow<EditProfileUiState> = _uiState.asStateFlow()
@@ -100,7 +105,7 @@ class EditProfileViewModel(
             userRepository.updateUserProfile(
                 name = _uiState.value.name,
                 email = _uiState.value.email,
-                profilePhoto = _uiState.value.profilePhoto
+                photoUri = _uiState.value.selectedPhotoUri
             ).collect { result ->
                 when (result) {
                     is Result.Loading -> {
@@ -109,7 +114,9 @@ class EditProfileViewModel(
                     is Result.Success -> {
                         _uiState.value = _uiState.value.copy(
                             isLoading = false,
-                            successMessage = "Profile updated successfully"
+                            successMessage = "Profile updated successfully",
+                            profilePhoto = result.data.profilePhoto,
+                            selectedPhotoUri = null // Clear selected URI after successful upload
                         )
                     }
                     is Result.Error -> {
@@ -131,5 +138,12 @@ class EditProfileViewModel(
             errorMessage = null,
             successMessage = null
         )
+    }
+
+    /**
+     * Log out the current user
+     */
+    fun logout() {
+        authRepository.logout()
     }
 }

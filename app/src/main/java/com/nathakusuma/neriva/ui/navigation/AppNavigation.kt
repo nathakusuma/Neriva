@@ -112,6 +112,12 @@ fun AppNavigation(
             EditProfileScreen(
                 onBackClick = {
                     navController.popBackStack()
+                },
+                onLogout = {
+                    navController.navigate(Screen.Login.route) {
+                        // Clear all screens from back stack so user can't go back after logout
+                        popUpTo(0) { inclusive = true }
+                    }
                 }
             )
         }

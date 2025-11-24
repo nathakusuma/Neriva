@@ -48,12 +48,14 @@ private val TextBrown = Color(0xFF6B4F3B)
  * @param modifier Modifier to be applied to the root composable
  * @param viewModel ViewModel for managing edit profile state
  * @param onBackClick Callback when user clicks back button
+ * @param onLogout Callback when user clicks logout button
  */
 @Composable
 fun EditProfileScreen(
     modifier: Modifier = Modifier,
     viewModel: EditProfileViewModel = viewModel(),
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    onLogout: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -220,19 +222,44 @@ fun EditProfileScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = uiState.email,
-                    onValueChange = { viewModel.updateEmail(it) },
+                    onValueChange = { }, // No-op since field is read-only
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     singleLine = true,
+                    enabled = false,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = Color.White.copy(alpha = 0.7f),
-                        unfocusedContainerColor = Color.White.copy(alpha = 0.7f),
-                        focusedBorderColor = PrimaryBrown.copy(alpha = 0.7f),
-                        unfocusedBorderColor = PrimaryBrown.copy(alpha = 0.2f),
-                        cursorColor = PrimaryBrown,
-                        focusedTextColor = TextBrown,
-                        unfocusedTextColor = TextBrown
+                        disabledContainerColor = Color.White.copy(alpha = 0.5f),
+                        disabledBorderColor = PrimaryBrown.copy(alpha = 0.2f),
+                        disabledTextColor = TextBrown.copy(alpha = 0.6f)
                     )
+                )
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Logout Button
+            OutlinedButton(
+                onClick = {
+                    viewModel.logout()
+                    onLogout()
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = Color(0xFFD32F2F)
+                ),
+                border = androidx.compose.foundation.BorderStroke(
+                    width = 1.dp,
+                    color = Color(0xFFD32F2F)
+                )
+            ) {
+                Text(
+                    text = "Log Out",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
         }
@@ -455,4 +482,3 @@ private fun EditProfileScreenPreview() {
         EditProfileScreen()
     }
 }
-
