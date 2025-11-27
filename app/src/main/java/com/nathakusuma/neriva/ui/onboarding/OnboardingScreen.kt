@@ -17,6 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.nathakusuma.neriva.data.local.TokenManager
 
 /**
  * Onboarding screen for introducing users to the app
@@ -34,6 +35,7 @@ fun OnboardingScreen(
     onFinish: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val tokenManager = remember { TokenManager.getInstance() }
 
     OnboardingScreenContent(
         modifier = modifier,
@@ -47,6 +49,8 @@ fun OnboardingScreen(
             if (!uiState.isLastPage) {
                 viewModel.navigateNext()
             } else {
+                // Mark onboarding as completed before finishing
+                tokenManager.setOnboardingCompleted()
                 onFinish()
             }
         }

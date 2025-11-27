@@ -25,6 +25,7 @@ class TokenManager private constructor(context: Context) {
         private var instance: TokenManager? = null
 
         private val TOKEN_KEY = stringPreferencesKey("auth_token")
+        private val ONBOARDING_COMPLETED_KEY = stringPreferencesKey("onboarding_completed")
 
         fun getInstance(context: Context? = null): TokenManager {
             return instance ?: synchronized(this) {
@@ -85,6 +86,28 @@ class TokenManager private constructor(context: Context) {
      */
     fun isAuthenticated(): Boolean {
         return getToken() != null
+    }
+
+    /**
+     * Mark onboarding as completed
+     */
+    fun setOnboardingCompleted() {
+        runBlocking {
+            appContext.dataStore.edit { preferences ->
+                preferences[ONBOARDING_COMPLETED_KEY] = "true"
+            }
+        }
+    }
+
+    /**
+     * Check if onboarding has been completed
+     */
+    fun hasCompletedOnboarding(): Boolean {
+        return runBlocking {
+            appContext.dataStore.data.map { preferences ->
+                preferences[ONBOARDING_COMPLETED_KEY] == "true"
+            }.first()
+        }
     }
 }
 

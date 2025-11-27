@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.nathakusuma.neriva.data.local.TokenManager
 import com.nathakusuma.neriva.ui.auth.LoginScreen
 import com.nathakusuma.neriva.ui.auth.SignUpScreen
 import com.nathakusuma.neriva.ui.chat.ChatScreen
@@ -19,17 +20,32 @@ import com.nathakusuma.neriva.ui.profile.EditProfileScreen
  *
  * @param modifier Modifier to be applied to the NavHost
  * @param navController The NavController that manages navigation
- * @param startDestination The starting destination route
+ * @param startDestination The starting destination route (will be determined by auth state if not provided)
  */
 @Composable
 fun AppNavigation(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = Screen.Onboarding.route
+    startDestination: String? = null
 ) {
+    // Check authentication state and determine start destination
+    val tokenManager = remember { TokenManager.getInstance() }
+    val isAuthenticated by remember {
+        mutableStateOf(tokenManager.isAuthenticated())
+    }
+    val hasCompletedOnboarding by remember {
+        mutableStateOf(tokenManager.hasCompletedOnboarding())
+    }
+
+    val destination = startDestination ?: when {
+        isAuthenticated -> Screen.Home.route
+        hasCompletedOnboarding -> Screen.Login.route
+        else -> Screen.Onboarding.route
+    }
+
     NavHost(
         navController = navController,
-        startDestination = startDestination,
+        startDestination = destination,
         modifier = modifier
     ) {
         // Onboarding Screen
