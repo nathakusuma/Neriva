@@ -46,12 +46,7 @@ class UserRepository(
                 emit(Result.Success(localUser))
             }
 
-            val token = tokenManager.getToken()
-            if (token.isNullOrEmpty()) {
-                throw Exception("No authentication token found")
-            }
-
-            val response = profileApiService.getUserProfile("Bearer $token")
+            val response = profileApiService.getUserProfile()
 
             if (response.success) {
                 // Convert ProfileData to User
@@ -107,7 +102,7 @@ class UserRepository(
                     throw Exception("No authentication token found")
                 }
 
-                val response = profileApiService.getUserProfile("Bearer $token")
+                val response = profileApiService.getUserProfile()
 
                 if (response.success && response.data.pet != null) {
                     userDataManager.savePet(response.data.pet)
@@ -163,7 +158,6 @@ class UserRepository(
             }
 
             val response = profileApiService.updateProfile(
-                token = "Bearer $token",
                 profile = profileBody,
                 photo = photoPart
             )
@@ -200,4 +194,3 @@ class UserRepository(
         }
     }
 }
-
