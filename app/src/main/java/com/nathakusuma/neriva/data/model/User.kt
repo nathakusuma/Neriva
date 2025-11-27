@@ -11,5 +11,5 @@ data class User(
     val email: String,
     @SerializedName("profilePhoto")
     val profilePhoto: String? = null,
-    val unreadNotifications: Int = 0 // TODO: add this in the backend response
+    val unreadMails: Int = 0 // TODO: add this in the backend response
 )

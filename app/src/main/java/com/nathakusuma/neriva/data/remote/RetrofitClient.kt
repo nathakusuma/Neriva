@@ -62,5 +62,12 @@ object RetrofitClient {
     val chatApiService: ChatApiService by lazy {
         retrofit.create(ChatApiService::class.java)
     }
+
+    /**
+     * Mail API Service instance
+     */
+    val mailApiService: MailApiService by lazy {
+        retrofit.create(MailApiService::class.java)
+    }
 }
 

@@ -85,7 +85,7 @@ fun HomeScreen(
                     }
 
                     InboxIconWithBadge(
-                        countText = "${uiState.userProfile?.unreadNotifications ?: 0}+",
+                        countText = "${uiState.userProfile?.unreadMails ?: 0}+",
                         onClick = onNavigateToInbox
                     )
                 }
