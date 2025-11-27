@@ -12,12 +12,14 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -26,6 +28,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.nathakusuma.neriva.data.model.ChatMessage
+import com.nathakusuma.neriva.utils.ChatUtils
+import com.nathakusuma.neriva.utils.DateTimeUtils
 
 /**
  * Chat screen for communicating with the pet
@@ -37,11 +41,43 @@ import com.nathakusuma.neriva.data.model.ChatMessage
 @Composable
 fun ChatScreen(
     modifier: Modifier = Modifier,
-    viewModel: ChatViewModel = viewModel(),
+    viewModel: ChatViewModel = run {
+        val context = LocalContext.current
+        viewModel(factory = ChatViewModelFactory(context))
+    },
     onBackClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val chatBackground = Color(0xFFF5E9E2)
+    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+
+    // Track if initial load is complete to prevent premature pagination
+    var initialLoadComplete by remember { mutableStateOf(false) }
+
+    // Mark initial load as complete once we have messages and not loading
+    LaunchedEffect(uiState.messages.isNotEmpty(), uiState.isLoading) {
+        if (uiState.messages.isNotEmpty() && !uiState.isLoading) {
+            initialLoadComplete = true
+        }
+    }
+
+    // Auto-scroll to bottom when new messages arrive
+    LaunchedEffect(uiState.messages.size) {
+        if (uiState.messages.isNotEmpty()) {
+            listState.animateScrollToItem(uiState.messages.size)
+        }
+    }
+
+    // Load more messages when scrolling to top
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.firstVisibleItemIndex }
+            .collect { firstVisibleIndex ->
+                // Only load more after initial load is complete, when user scrolls near the top
+                if (initialLoadComplete && firstVisibleIndex == 0 && uiState.canLoadMore && !uiState.isLoadingMore && !uiState.isLoading) {
+                    viewModel.loadMoreMessages()
+                }
+            }
+    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -73,6 +109,7 @@ fun ChatScreen(
                 )
             } else {
                 LazyColumn(
+                    state = listState,
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(innerPadding)
@@ -91,7 +128,8 @@ fun ChatScreen(
                         ChatMessageRow(
                             message = message,
                             showAuthorName = showAuthorName,
-                            avatarUrl = ""  // Pet model doesn't have imageUrl anymore
+                            avatarUrl = "",  // Pet model doesn't have imageUrl anymore
+                            petName = uiState.pet?.name
                         )
 
                         Spacer(modifier = Modifier.height(12.dp))
@@ -234,11 +272,15 @@ fun DayHeader(label: String) {
 fun ChatMessageRow(
     message: ChatMessage,
     showAuthorName: Boolean,
-    avatarUrl: String
+    avatarUrl: String,
+    petName: String? = null
 ) {
     val myBubbleColor = Color(0xFF7B5A48)
     val friendBubbleColor = Color.White
     val timeColor = Color(0xFFB1A79E)
+
+    val formattedTime = DateTimeUtils.formatChatTime(message.createdAt)
+    val authorName = ChatUtils.getAuthorName(message.senderType, petName)
 
     if (message.fromMe) {
         Row(
@@ -258,7 +300,7 @@ fun ChatMessageRow(
                     )
                 ) {
                     Text(
-                        text = message.text,
+                        text = message.message,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
                         color = Color.White,
                         style = MaterialTheme.typography.bodyMedium
@@ -266,7 +308,7 @@ fun ChatMessageRow(
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = message.time,
+                    text = formattedTime,
                     style = MaterialTheme.typography.labelSmall,
                     color = timeColor
                 )
@@ -290,7 +332,7 @@ fun ChatMessageRow(
             ) {
                 if (showAuthorName) {
                     Text(
-                        text = message.author,
+                        text = authorName,
                         style = MaterialTheme.typography.bodySmall.copy(
                             fontWeight = FontWeight.SemiBold
                         ),
@@ -309,7 +351,7 @@ fun ChatMessageRow(
                     )
                 ) {
                     Text(
-                        text = message.text,
+                        text = message.message,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
                         color = Color(0xFF4B3C34),
                         style = MaterialTheme.typography.bodyMedium
@@ -317,7 +359,7 @@ fun ChatMessageRow(
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = message.time,
+                    text = formattedTime,
                     style = MaterialTheme.typography.labelSmall,
                     color = timeColor
                 )

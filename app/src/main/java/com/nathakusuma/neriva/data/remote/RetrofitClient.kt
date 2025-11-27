@@ -20,7 +20,10 @@ object RetrofitClient {
             level = HttpLoggingInterceptor.Level.BODY
         }
 
+        val authInterceptor = AuthInterceptor()
+
         OkHttpClient.Builder()
+            .addInterceptor(authInterceptor)
             .addInterceptor(loggingInterceptor)
             .connectTimeout(ApiConfig.CONNECT_TIMEOUT, TimeUnit.SECONDS)
             .readTimeout(ApiConfig.READ_TIMEOUT, TimeUnit.SECONDS)
@@ -51,6 +54,13 @@ object RetrofitClient {
      */
     val profileApiService: ProfileApiService by lazy {
         retrofit.create(ProfileApiService::class.java)
+    }
+
+    /**
+     * Chat API Service instance
+     */
+    val chatApiService: ChatApiService by lazy {
+        retrofit.create(ChatApiService::class.java)
     }
 }
 

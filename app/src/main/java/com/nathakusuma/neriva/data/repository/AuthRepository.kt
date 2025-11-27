@@ -1,5 +1,6 @@
 package com.nathakusuma.neriva.data.repository
 
+import android.content.Context
 import com.google.gson.Gson
 import com.nathakusuma.neriva.data.local.TokenManager
 import com.nathakusuma.neriva.data.local.UserDataManager
@@ -20,7 +21,8 @@ import retrofit2.HttpException
 class AuthRepository(
     private val apiService: AuthApiService = RetrofitClient.authApiService,
     private val tokenManager: TokenManager = TokenManager.getInstance(),
-    private val userDataManager: UserDataManager = UserDataManager.getInstance()
+    private val userDataManager: UserDataManager = UserDataManager.getInstance(),
+    @Suppress("unused") private val context: Context? = null
 ) {
 
     /**
@@ -115,9 +117,9 @@ class AuthRepository(
         @Volatile
         private var instance: AuthRepository? = null
 
-        fun getInstance(): AuthRepository {
+        fun getInstance(context: Context? = null): AuthRepository {
             return instance ?: synchronized(this) {
-                instance ?: AuthRepository().also { instance = it }
+                instance ?: AuthRepository(context = context).also { instance = it }
             }
         }
     }
