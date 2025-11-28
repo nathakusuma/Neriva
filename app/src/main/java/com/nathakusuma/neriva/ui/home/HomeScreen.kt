@@ -31,6 +31,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.nathakusuma.neriva.R
 import com.nathakusuma.neriva.ui.theme.NerivaTheme
+import com.nathakusuma.neriva.utils.DateTimeUtils
 
 /**
  * Home screen showing user profile, pet information, and quick actions
@@ -171,8 +172,8 @@ fun HomeScreen(
                                     modifier = Modifier.weight(1f)
                                 )
                                 InfoChip(
-                                    title = pet.birthDate,
-                                    subtitle = "Birth",
+                                    title = DateTimeUtils.calculateAge(pet.birthDate),
+                                    subtitle = "Age",
                                     modifier = Modifier.weight(1f)
                                 )
                                 InfoChip(
@@ -379,4 +380,3 @@ private fun HomePreview() {
         HomeScreen()
     }
 }
-

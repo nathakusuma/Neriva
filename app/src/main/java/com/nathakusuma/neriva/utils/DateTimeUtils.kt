@@ -2,6 +2,8 @@ package com.nathakusuma.neriva.utils
 
 import java.text.SimpleDateFormat
 import java.time.Instant
+import java.time.LocalDate
+import java.time.Period
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -44,5 +46,36 @@ object DateTimeUtils {
             }
         }
     }
-}
 
+    /**
+     * Calculate age from birth date string
+     *
+     * @param birthDateString Birth date in format "yyyy-MM-dd"
+     * @return Formatted age string (e.g., "2 Years", "1 Year", "5 Months", "1 Month", "15 Days", "1 Day")
+     */
+    fun calculateAge(birthDateString: String): String {
+        return try {
+            // Parse the birth date
+            val birthDate = LocalDate.parse(birthDateString, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+            val currentDate = LocalDate.now()
+
+            // Calculate the period between birth date and current date
+            val period = Period.between(birthDate, currentDate)
+
+            val years = period.years
+            val months = period.months
+            val days = period.days
+
+            // Round: if there are both years and months, only show years
+            when {
+                years > 0 -> if (years == 1) "1 Year" else "$years Years"
+                months > 0 -> if (months == 1) "1 Month" else "$months Months"
+                days > 0 -> if (days == 1) "1 Day" else "$days Days"
+                else -> "0 Day"
+            }
+        } catch (_: Exception) {
+            // Fallback: return the original string
+            birthDateString
+        }
+    }
+}

@@ -11,9 +11,9 @@ interface MailApiService {
 
     /**
      * Get all mails for current user
-     * GET /api/notifications
+     * GET /api/notifications?unreadOnly=true
      */
-    @GET("notifications")
+    @GET("notifications?unreadOnly=true")
     suspend fun getAllMails(): MailResponse
 
     /**
@@ -27,4 +27,3 @@ interface MailApiService {
         @Path("id") mailId: Int
     ): MarkAsReadResponse
 }
-
