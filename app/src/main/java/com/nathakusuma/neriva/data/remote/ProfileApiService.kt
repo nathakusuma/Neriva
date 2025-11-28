@@ -21,14 +21,14 @@ interface ProfileApiService {
      * Update user profile (with or without photo)
      * PUT /api/profile
      *
-     * @param profile JSON string containing profile data (name, email)
+     * @param profile JSON profile data as MultipartBody.Part
      * @param photo Optional profile photo file
      */
     @Multipart
     @PUT("profile")
     suspend fun updateProfile(
-        @Part("profile") profile: RequestBody,
-        @Part photo: MultipartBody.Part? = null
+        @Part profile: MultipartBody.Part,
+        @Part photo: MultipartBody.Part?
     ): ProfileResponse
 }
 

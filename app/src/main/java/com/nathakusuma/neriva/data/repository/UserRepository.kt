@@ -127,6 +127,7 @@ class UserRepository(
         name: String,
         photoUri: Uri? = null
     ): Flow<Result<User>> = flow {
+        var tempFile: File? = null
         try {
             emit(Result.Loading)
 
@@ -138,27 +139,53 @@ class UserRepository(
             // Create profile JSON (name only as per API spec)
             val profileRequest = UpdateProfileRequest(name)
             val profileJson = Gson().toJson(profileRequest)
-            val profileBody = profileJson.toRequestBody("application/json".toMediaTypeOrNull())
+            val profileRequestBody = profileJson.toRequestBody("application/json".toMediaTypeOrNull())
+            val profilePart = MultipartBody.Part.createFormData("profile", null, profileRequestBody)
 
             // Create photo part if URI is provided
-            val photoPart = photoUri?.let { uri ->
-                context?.let { ctx ->
-                    // Convert URI to File
-                    val inputStream = ctx.contentResolver.openInputStream(uri)
-                    val file = File(ctx.cacheDir, "upload_${System.currentTimeMillis()}.jpg")
-                    inputStream?.use { input ->
-                        FileOutputStream(file).use { output ->
+            val photoPart = if (photoUri != null && context != null) {
+                try {
+                    // Get MIME type from content resolver
+                    val mimeType = context.contentResolver.getType(photoUri) ?: "image/jpeg"
+                    android.util.Log.d("UserRepository", "Image MIME type: $mimeType")
+
+                    // Get file extension from MIME type
+                    val extension = when {
+                        mimeType.contains("jpeg") || mimeType.contains("jpg") -> "jpg"
+                        mimeType.contains("png") -> "png"
+                        else -> "jpg"
+                    }
+
+                    // Create temp file in cache directory
+                    tempFile = File(context.cacheDir, "upload_${System.currentTimeMillis()}.$extension")
+
+                    // Copy content from URI to file
+                    context.contentResolver.openInputStream(photoUri)?.use { input ->
+                        FileOutputStream(tempFile).use { output ->
                             input.copyTo(output)
                         }
                     }
 
-                    val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
-                    MultipartBody.Part.createFormData("photo", file.name, requestFile)
+                    // Verify file was created and has content
+                    if (!tempFile.exists() || tempFile.length() == 0L) {
+                        throw Exception("Failed to create image file")
+                    }
+
+                    android.util.Log.d("UserRepository", "Image file created: ${tempFile.absolutePath}, size: ${tempFile.length()} bytes")
+
+                    // Create RequestBody with proper MIME type
+                    val requestFile = tempFile.asRequestBody(mimeType.toMediaTypeOrNull())
+                    MultipartBody.Part.createFormData("photo", tempFile.name, requestFile)
+                } catch (e: Exception) {
+                    android.util.Log.e("UserRepository", "Failed to process image", e)
+                    throw Exception("Failed to process image: ${e.message}")
                 }
+            } else {
+                null
             }
 
             val response = profileApiService.updateProfile(
-                profile = profileBody,
+                profile = profilePart,
                 photo = photoPart
             )
 
@@ -170,6 +197,8 @@ class UserRepository(
                     profilePhoto = response.data.profilePhoto
                 )
 
+                android.util.Log.d("UserRepository", "Profile updated successfully. Photo URL: ${user.profilePhoto}")
+
                 // Save updated user to local storage
                 userDataManager.saveUser(user)
                 response.data.pet?.let { userDataManager.savePet(it) }
@@ -179,7 +208,16 @@ class UserRepository(
                 throw Exception(response.message)
             }
         } catch (e: Exception) {
+            android.util.Log.e("UserRepository", "Failed to update profile", e)
             emit(Result.Error(e))
+        } finally {
+            // Clean up temp file
+            tempFile?.let {
+                if (it.exists()) {
+                    it.delete()
+                    android.util.Log.d("UserRepository", "Temp file cleaned up")
+                }
+            }
         }
     }
 
