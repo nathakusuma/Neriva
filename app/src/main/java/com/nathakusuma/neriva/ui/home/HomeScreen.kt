@@ -94,7 +94,7 @@ fun HomeScreen(
 
                 // Speech bubble
                 SpeechBubble(
-                    text = "Feeling tired today? I would like to hear about your story :)"
+                    text = uiState.pet?.welcomingStatement ?: "Feeling tired today? I would like to hear about your story :)"
                 )
 
                 Spacer(Modifier.height(16.dp))
@@ -118,7 +118,7 @@ fun HomeScreen(
 
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)
-                                .data(R.drawable.ic_home_profile_placeholder)
+                                .data(pet.petHomeImage)
                                 .crossfade(true)
                                 .build(),
                             contentDescription = "Pet Illustration",

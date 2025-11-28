@@ -15,5 +15,11 @@ data class Pet(
     val birthDate: String,
     val weight: Double,
     val vaccine: Boolean,
-    val description: String
+    val description: String,
+    @SerializedName("petHomeImage")
+    val petHomeImage: String?,
+    @SerializedName("petProfileImage")
+    val petProfileImage: String?,
+    @SerializedName("welcomingStatement")
+    val welcomingStatement: String?
 )
