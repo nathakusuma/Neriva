@@ -108,15 +108,6 @@ fun HomeScreen(
                             .padding(vertical = 8.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        // Ground ellipse shadow (subtle)
-                        Box(
-                            modifier = Modifier
-                                .width(210.dp)
-                                .height(22.dp)
-                                .shadow(1.dp, CircleShape)
-                                .background(Color(0x22000000), CircleShape)
-                        )
-
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)
                                 .data(pet.petHomeImage)
