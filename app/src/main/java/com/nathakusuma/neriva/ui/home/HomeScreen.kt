@@ -14,8 +14,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -23,6 +26,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -31,6 +37,43 @@ import coil.request.ImageRequest
 import com.nathakusuma.neriva.R
 import com.nathakusuma.neriva.ui.theme.NerivaTheme
 import com.nathakusuma.neriva.utils.DateTimeUtils
+
+/**
+ * Custom shape for the bottom sheet with a smooth curved top edge.
+ */
+class HomeBottomSheetShape(
+    private val curveHeight: Dp = 24.dp
+) : Shape {
+    override fun createOutline(
+        size: Size,
+        layoutDirection: LayoutDirection,
+        density: Density
+    ): Outline {
+        val curveHeightPx = with(density) { curveHeight.toPx() }
+        val width = size.width
+        val height = size.height
+
+        val path = Path().apply {
+            // Start from top-left at curve height
+            moveTo(0f, curveHeightPx)
+
+            // Smooth upward curve in the center
+            quadraticTo(
+                width / 2f, 0f,          // control point (top middle)
+                width, curveHeightPx    // end at top-right
+            )
+
+            // Right edge
+            lineTo(width, height)
+            // Bottom edge
+            lineTo(0f, height)
+            // Left edge
+            close()
+        }
+
+        return Outline.Generic(path)
+    }
+}
 
 /**
  * Home screen showing user profile, pet information, and quick actions
@@ -128,7 +171,7 @@ fun HomeScreen(
             uiState.pet?.let { pet ->
                 Surface(
                     color = Color.White,
-                    shape = RoundedCornerShape(topStart = 36.dp, topEnd = 36.dp),
+                    shape = HomeBottomSheetShape(curveHeight = 32.dp),
                     tonalElevation = 1.dp,
                     shadowElevation = 2.dp,
                     modifier = Modifier
@@ -140,6 +183,8 @@ fun HomeScreen(
                             .fillMaxWidth()
                             .padding(horizontal = 20.dp, vertical = 16.dp)
                     ) {
+                        Spacer(modifier = Modifier.height(32.dp))
+
                         Text(
                             pet.name,
                             fontSize = 26.sp,
