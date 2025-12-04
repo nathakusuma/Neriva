@@ -14,7 +14,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -57,15 +56,18 @@ fun HomeScreen(
         modifier = modifier
             .fillMaxSize()
             .background(softBeige)
-            .padding(horizontal = 20.dp, vertical = 12.dp)
     ) {
         if (uiState.isLoading) {
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center)
             )
         } else {
-            Column(Modifier.fillMaxSize()) {
-                // Top row: avatar, welcome, inbox
+            // Top content
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 20.dp, vertical = 12.dp)
+            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -93,14 +95,13 @@ fun HomeScreen(
 
                 Spacer(Modifier.height(18.dp))
 
-                // Speech bubble
                 SpeechBubble(
-                    text = uiState.pet?.welcomingStatement ?: "Feeling tired today? I would like to hear about your story :)"
+                    text = uiState.pet?.welcomingStatement
+                        ?: "Feeling tired today? I would like to hear about your story :)"
                 )
 
                 Spacer(Modifier.height(16.dp))
 
-                // Illustration
                 uiState.pet?.let { pet ->
                     Box(
                         modifier = Modifier
@@ -121,105 +122,101 @@ fun HomeScreen(
                         )
                     }
                 }
+            }
 
-                Spacer(Modifier.height(8.dp))
-
-                // Bottom sheet card
-                uiState.pet?.let { pet ->
-                    Surface(
-                        color = Color.White,
-                        shape = RoundedCornerShape(topStart = 36.dp, topEnd = 36.dp),
-                        tonalElevation = 1.dp,
-                        shadowElevation = 2.dp,
+            // Bottom sheet
+            uiState.pet?.let { pet ->
+                Surface(
+                    color = Color.White,
+                    shape = RoundedCornerShape(topStart = 36.dp, topEnd = 36.dp),
+                    tonalElevation = 1.dp,
+                    shadowElevation = 2.dp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter)
+                ) {
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .weight(1f)
+                            .padding(horizontal = 20.dp, vertical = 16.dp)
                     ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(horizontal = 20.dp, vertical = 16.dp)
+                        Text(
+                            pet.name,
+                            fontSize = 26.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            pet.animalType,
+                            color = Color(0xFF7A7A7A),
+                            fontSize = 13.sp
+                        )
+
+                        Spacer(Modifier.height(14.dp))
+
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(
-                                pet.name,
-                                fontSize = 26.sp,
-                                fontWeight = FontWeight.SemiBold
+                            InfoChip(
+                                title = pet.gender,
+                                subtitle = "Sex",
+                                modifier = Modifier.weight(1f)
                             )
-                            Text(
-                                pet.animalType,
-                                color = Color(0xFF7A7A7A),
-                                fontSize = 13.sp
+                            InfoChip(
+                                title = DateTimeUtils.calculateAge(pet.birthDate),
+                                subtitle = "Age",
+                                modifier = Modifier.weight(1f)
                             )
-
-                            Spacer(Modifier.height(14.dp))
-
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                InfoChip(
-                                    title = pet.gender,
-                                    subtitle = "Sex",
-                                    modifier = Modifier.weight(1f)
-                                )
-                                InfoChip(
-                                    title = DateTimeUtils.calculateAge(pet.birthDate),
-                                    subtitle = "Age",
-                                    modifier = Modifier.weight(1f)
-                                )
-                                InfoChip(
-                                    title = "${pet.weight}kg",
-                                    subtitle = "Weight",
-                                    modifier = Modifier.weight(1f)
-                                )
-                                InfoChip(
-                                    title = if (pet.vaccine) "Yes" else "No",
-                                    subtitle = "Vaccine",
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-
-                            Spacer(Modifier.height(18.dp))
-
-                            Text(
-                                "Description:",
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 16.sp
+                            InfoChip(
+                                title = "${pet.weight}kg",
+                                subtitle = "Weight",
+                                modifier = Modifier.weight(1f)
                             )
-                            Spacer(Modifier.height(6.dp))
-                            Text(
-                                pet.description,
-                                color = Color(0xFF5E5E5E),
-                                lineHeight = 20.sp,
-                                maxLines = 5,
-                                overflow = TextOverflow.Ellipsis
+                            InfoChip(
+                                title = if (pet.vaccine) "Yes" else "No",
+                                subtitle = "Vaccine",
+                                modifier = Modifier.weight(1f)
                             )
+                        }
 
-                            Spacer(Modifier.weight(1f))
+                        Spacer(Modifier.height(18.dp))
 
-                            // CTA button
-                            Button(
-                                onClick = onNavigateToChat,
-                                shape = RoundedCornerShape(28.dp),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(56.dp)
-                            ) {
-                                Text("Talk to your pet")
-                                Spacer(Modifier.width(8.dp))
-                                Image(
-                                    painter = painterResource(id = R.drawable.ic_home_paw),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            }
+                        Text(
+                            "Description:",
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 16.sp
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            pet.description,
+                            color = Color(0xFF5E5E5E),
+                            lineHeight = 20.sp,
+                            maxLines = 5,
+                            overflow = TextOverflow.Ellipsis
+                        )
+
+                        Spacer(Modifier.height(16.dp))
+
+                        Button(
+                            onClick = onNavigateToChat,
+                            shape = RoundedCornerShape(28.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp)
+                        ) {
+                            Text("Talk to your pet")
+                            Spacer(Modifier.width(8.dp))
+                            Image(
+                                painter = painterResource(id = R.drawable.ic_home_paw),
+                                contentDescription = null,
+                                modifier = Modifier.size(22.dp)
+                            )
                         }
                     }
                 }
             }
         }
 
-        // Show error if any
         uiState.errorMessage?.let { error ->
             Snackbar(
                 modifier = Modifier
