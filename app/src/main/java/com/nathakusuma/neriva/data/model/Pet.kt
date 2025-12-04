@@ -1,12 +1,13 @@
 package com.nathakusuma.neriva.data.model
 
 import com.google.gson.annotations.SerializedName
+import java.util.UUID
 
 /**
  * Data model representing a pet
  */
 data class Pet(
-    val id: Int,
+    val id: UUID,
     val name: String,
     @SerializedName("animalType")
     val animalType: String,

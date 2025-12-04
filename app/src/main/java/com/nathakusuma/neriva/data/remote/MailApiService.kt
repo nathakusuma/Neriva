@@ -3,6 +3,7 @@ package com.nathakusuma.neriva.data.remote
 import com.nathakusuma.neriva.data.model.MarkAsReadResponse
 import com.nathakusuma.neriva.data.model.MailResponse
 import retrofit2.http.*
+import java.util.UUID
 
 /**
  * Retrofit API Service for mail endpoints
@@ -24,6 +25,6 @@ interface MailApiService {
      */
     @PUT("notifications/{id}/read")
     suspend fun markMailAsRead(
-        @Path("id") mailId: Int
+        @Path("id") mailId: UUID
     ): MarkAsReadResponse
 }

@@ -7,6 +7,7 @@ import com.nathakusuma.neriva.data.remote.MailApiService
 import com.nathakusuma.neriva.data.remote.RetrofitClient
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import java.util.UUID
 
 /**
  * Repository for mail operations
@@ -49,7 +50,7 @@ class MailRepository(
      *
      * @param mailId The ID of the mail to mark as read
      */
-    fun markMailAsRead(mailId: Int): Flow<Result<Boolean>> = flow {
+    fun markMailAsRead(mailId: UUID): Flow<Result<Boolean>> = flow {
         try {
             emit(Result.Loading)
 

@@ -99,12 +99,9 @@ fun MailScreen(
                         MailCard(
                             mail = mail,
                             onClick = {
-                                // TODO: If using Navigation, navigate to MailDetail screen instead of local dialog
                                 selectedMail = mail
                             },
                             onDeleteClick = {
-                                // Here you could call a delete API or update local state
-                                // TODO: Integrate REST API call to delete / archive this mail
                                 viewModel.deleteMail(mail.id)
                             }
                         )

@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 /**
  * UI State for Mail Screen
@@ -74,7 +75,7 @@ class MailViewModel(
      *
      * @param mailId The ID of the mail to delete
      */
-    fun deleteMail(mailId: Int) {
+    fun deleteMail(mailId: UUID) {
         viewModelScope.launch {
             // Mark as read on the server
             mailRepository.markMailAsRead(mailId).collect { result ->

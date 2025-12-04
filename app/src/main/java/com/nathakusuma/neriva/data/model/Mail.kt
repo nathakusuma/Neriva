@@ -1,6 +1,7 @@
 package com.nathakusuma.neriva.data.model
 
 import com.google.gson.annotations.SerializedName
+import java.util.UUID
 
 /**
  * Data class representing a mail
@@ -13,7 +14,7 @@ import com.google.gson.annotations.SerializedName
  * @property createdAt Timestamp when the mail was created
  */
 data class Mail(
-    val id: Int,
+    val id: UUID,
     val title: String,
     val content: String,
     val type: String,

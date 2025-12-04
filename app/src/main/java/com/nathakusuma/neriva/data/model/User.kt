@@ -1,12 +1,13 @@
 package com.nathakusuma.neriva.data.model
 
 import com.google.gson.annotations.SerializedName
+import java.util.UUID
 
 /**
  * Data model representing a user
  */
 data class User(
-    val id: Int,
+    val id: UUID,
     val name: String,
     val email: String,
     @SerializedName("profilePhoto")
